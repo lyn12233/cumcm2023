@@ -317,3 +317,66 @@ void calcflow(const std::vector<vec2> &ab,     //
   }
   per = tot / areas;
 }
+
+void fittness_v1(                                    //
+    float r_min, float r_max,                        //
+    float D,                                         //
+    float yc,                                        //
+    float R_effect,                                  // this not to opt
+    std::function<bool(float, float)> within,        //
+    float pa0, float pa1, float pa2,                 //
+    float pa3, float pa4, float pa5,                 //
+    float pb0, float pb1, float pb2,                 //
+    float pb3, float pb4, float pb5,                 //
+    float ph0, float ph1, float ph2,                 //
+    float ph3, float ph4, float ph5,                 //
+    std::vector<float> &tot, std::vector<float> &per //
+) {
+  const float days[12] = {0,   30,  60,  90,  120, 150,
+                          180, 210, 240, 270, 300, 330};
+  const float hours[5] = {9, 10.5, 12, 13.5, 15};
+  const float lat = 39.4 * pi / 180;
+  const float height = 3;
+  const float hc1 = 80, hc2 = 8, rc = 3.5;
+  const float Omega = 0.53 * pi / 180;
+
+  vector<int> nears;
+  vector<float> eta_c, eta_a, eta_t, eta_s;
+
+  tot.resize(60);
+  per.resize(60);
+
+  for (int i_day = 0; i_day < 12; i_day++) {
+    for (int i_hour = 0; i_hour < 5; i_hour++) {
+
+      float phi, theta;
+      get_sun_info(days[i_day], hours[i_hour], lat, phi, theta);
+      float dni = get_dni(phi, height);
+
+      vector<vec3> coords;
+      gen_coord(r_min, r_max, D, yc, within, coords);
+
+      vector<vec2> rects;
+      gen_abh(coords, rects, yc, r_min, r_max, D, pa0, pa1, pa2, pa3, pa4, pa5,
+              pb0, pb1, pb2, pb3, pb4, pb5, ph0, ph1, ph2, ph3, ph4, ph5);
+
+      nears.resize(coords.size());
+      for (int i = 0; i < coords.size(); i++)
+        nears[i] = i;
+
+      eta_c.resize(coords.size());
+      eta_a.resize(coords.size());
+      eta_t.resize(coords.size());
+      eta_s.resize(coords.size());
+
+      for (int i_coord = 0; i_coord < coords.size(); i_coord++) {
+        calcetas(coords, rects, i_coord, nears.size(), nears.data(), R_effect,
+                 yc, hc1, hc2, rc, theta, phi, Omega, eta_c[i_coord],
+                 eta_a[i_coord], eta_t[i_coord], eta_s[i_coord]);
+      }
+
+      calcflow(rects, eta_c, eta_a, eta_t, eta_s, dni, tot[i_day * 5 + i_hour],
+               per[i_day * 5 + i_hour]);
+    }
+  }
+}

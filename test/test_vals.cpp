@@ -8,7 +8,7 @@ using std::endl;
 
 int main() {
   float D, ST, alti;
-  cout << "input: date from spring, the hour, altitude\n";
+  cout << "input: date from spring, the hour, latitude\n";
   cin >> D >> ST >> alti;
   alti = alti * 3.14 / 180;
   float phi, theta;

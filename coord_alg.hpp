@@ -23,7 +23,7 @@ void gen_abh(std::vector<vec3> &coords, std::vector<vec2> &ab, //
              float ph3, float ph4, float ph5                   //
 );
 
-void get_sun_info(float D, float ST, float altitude, //
+void get_sun_info(float D, float ST, float latitude, //
                   float &phi, float &theta           //
 );
 
@@ -50,4 +50,19 @@ void calcflow(const std::vector<vec2> &ab,     //
               const std::vector<float> &eta_s, //
               float dni,                       //
               float &tot, float &per           //
+);
+
+void fittness_v1(                                    //
+    float r_min, float r_max,                        //
+    float D,                                         //
+    float yc,                                        //
+    float R_effect,                                  // this not to opt
+    std::function<bool(float, float)> within,        //
+    float pa0, float pa1, float pa2,                 //
+    float pa3, float pa4, float pa5,                 //
+    float pb0, float pb1, float pb2,                 //
+    float pb3, float pb4, float pb5,                 //
+    float ph0, float ph1, float ph2,                 //
+    float ph3, float ph4, float ph5,                 //
+    std::vector<float> &tot, std::vector<float> &per //
 );
