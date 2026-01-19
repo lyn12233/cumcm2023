@@ -29,9 +29,15 @@ void get_sun_info(float D, float ST, float altitude, //
 
 float get_dni(float phi, float height);
 
+void prepare_nears(const std::vector<vec3> &coords,       //
+                   float R_effect, float D,               //
+                   std::vector<std::vector<int>> &groups, //
+                   std::vector<int> &id2group             //
+);
+
 void calcetas(const std::vector<vec3> &coords,                       //
               const std::vector<vec2> &ab,                           //
-              int at, int nb_near, int *nears, float R_effect,       //
+              int at, int nb_near, const int *nears, float R_effect, //
               float y_c, float h_c1, float h_c2, float rc,           //
               float theta, float phi, float Omega,                   //
               float &eta_c, float &eta_a, float &eta_t, float &eta_s //

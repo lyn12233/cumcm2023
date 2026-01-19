@@ -14,15 +14,17 @@ bool within(float x, float y) { return x * x + y * y < 300 * 300; }
 int main() {
 
   float yc = 0.f;
+  float r_min = 100, r_max = 300;
+  float d = 11, r_effect = 30;
 
   clock_t t0 = clock();
 
   vector<vec3> coords;
-  gen_coord(100, 300, 12, yc, within, coords);
+  gen_coord(r_min, r_max, d, yc, within, coords);
   vector<vec2> rects;
-  gen_abh(coords, rects, -100, 100, 300, 12, //
-          1, 1, 1, 1, 1, 1,                  //
-          1, 1, 1, 1, 1, 1,                  //
+  gen_abh(coords, rects, yc, r_min, r_max, d, //
+          1, 1, 1, 1, 1, 1,                   //
+          1, 1, 1, 1, 1, 1,                   //
           1, 1, 1, 1, 1, 1);
 
   clock_t t1 = clock();
@@ -31,16 +33,23 @@ int main() {
   for (int i = 0; i < nears.size(); i++) {
     nears[i] = i;
   }
+
+  // vector<vector<int>> groups;
+  // vector<int> id2group;
+  // prepare_nears(coords, r_effect, d, groups, id2group);
+
   auto eta_cs = vector<float>(coords.size());
   auto eta_as = vector<float>(coords.size());
   auto eta_ts = vector<float>(coords.size());
   auto eta_ss = vector<float>(coords.size());
 
   for (int i = 0; i < coords.size(); i++) {
-    calcetas(coords, rects, i, nears.size(), nears.data(), //
-             30,                                           // Reffect
-             yc, 80, 8, 3.5,                               // yc,hc1,hc2,rc
-             180 * 3.14 / 180, 52 * 3.14 / 180,
+    // const auto &thegroup = groups.at(id2group.at(i));
+    calcetas(coords, rects, i,                          //
+             nears.size(), nears.data(),                //
+             r_effect,                                  // Reffect
+             yc, 80, 8, 3.5,                            // yc,hc1,hc2,rc
+             180 * 3.14 / 180, 52 * 3.14 / 180,         //
              0.53 * 3.14 / 180,                         // theta,phi,Omega
              eta_cs[i], eta_as[i], eta_ts[i], eta_ss[i] //
     );

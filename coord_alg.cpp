@@ -26,7 +26,7 @@ void gen_coord(float R_min, float R_max, float D,        //
   bool odd = true;
   while (r + D < R_max) {
 
-    cout << "collecting ring " << r << endl;
+    // cout << "collecting ring " << r << endl;
     int dbg_cnt = 0;
 
     // push points
@@ -63,7 +63,7 @@ void gen_coord(float R_min, float R_max, float D,        //
     // update oddness
     odd = !odd;
 
-    cout << "collected count " << dbg_cnt << endl;
+    // cout << "collected count " << dbg_cnt << endl;
 
     // update r, theta
     float r2 = r * cos(theta) + sqrt(D * D - pow(r * sin(theta), 2));
@@ -149,9 +149,65 @@ float get_dni(float phi, float height) {
   return g0 * (a + b * exp(-c / sin(phi)));
 }
 
+void prepare_nears(const std::vector<vec3> &coords,       //
+                   float R_effect, float D,               //
+                   std::vector<std::vector<int>> &groups, //
+                   std::vector<int> &id2group             //
+) {
+  // (1) get range, logN
+  float x_min = 1e8, x_max = -1e8;
+  float y_min = 1e8, y_max = -1e8;
+  for (const auto &c : coords) {
+    x_min = std::min(x_min, c.x);
+    x_max = std::max(x_max, c.x);
+    y_min = std::min(y_min, c.y);
+    y_max = std::max(y_max, c.y);
+  }
+  int Nx = (x_max - x_min) / R_effect / 4;
+  int Ny = (y_max - y_min) / R_effect / 4;
+
+  cout << "Nx,Ny: " << Nx << ", " << Ny << endl;
+
+  // (2) prepare groups and id2group
+  groups.resize(Nx * Ny); // ix,iy at ix*Ny+iy
+  for (int i = 0; i < Nx * Ny; i++) {
+    groups[i].clear();
+  }
+  id2group.resize(coords.size());
+
+  // (3) put each coord to some groups and a lookup group(id2group)
+  for (int i = 0; i < coords.size(); i++) {
+    const auto &c = coords[i];
+    float fx = (c.x - x_min) / (x_max - x_min);
+    float fy = (c.y - y_min) / (y_max - y_min);
+
+    // each coord belongs to a group
+    int ix = clip(round(fx), 0, Nx - 1), iy = clip(round(fy), 0, Ny - 1);
+    id2group[i] = ix * Ny + iy;
+
+    // a coord may be effective in 4 groups
+    ix = floor(fx), iy = floor(fy);
+    if (ix >= 0 && ix < Nx && iy >= 0 && iy < Ny) {
+      groups[ix * Ny + iy].push_back(i);
+    }
+    ix++;
+    if (ix >= 0 && ix < Nx && iy >= 0 && iy < Ny) {
+      groups[ix * Ny + iy].push_back(i);
+    }
+    iy++;
+    if (ix >= 0 && ix < Nx && iy >= 0 && iy < Ny) {
+      groups[ix * Ny + iy].push_back(i);
+    }
+    ix--;
+    if (ix >= 0 && ix < Nx && iy >= 0 && iy < Ny) {
+      groups[ix * Ny + iy].push_back(i);
+    }
+  }
+}
+
 void calcetas(const vector<vec3> &coords,                            //
               const vector<vec2> &ab,                                //
-              int at, int nb_near, int *nears, float R_effect,       //
+              int at, int nb_near, const int *nears, float R_effect, //
               float y_c, float h_c1, float h_c2, float rc,           //
               float theta, float phi, float Omega,                   //
               float &eta_c, float &eta_a, float &eta_t, float &eta_s //
