@@ -3,14 +3,18 @@ cmake_minimum_required(VERSION 3.10)
 project(cumcm)
 
 add_library(libmain 
-    coord_alg.cpp 
+    coord_alg.cpp
+    opt_alg.cpp
     vec_types.cpp
 )
 target_include_directories(libmain PUBLIC ${CMAKE_SOURCE_DIR})
 
 add_executable(test_fit test/test_fit.cpp)
 add_executable(test_gen test/test_gen.cpp)
+add_executable(test_opt test/test_opt.cpp)
 add_executable(test_vals test/test_vals.cpp)
+
 target_link_libraries(test_fit libmain)
 target_link_libraries(test_gen libmain)
+target_link_libraries(test_opt libmain)
 target_link_libraries(test_vals libmain)
