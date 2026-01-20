@@ -4,6 +4,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <cstdio>
 #include <functional>
 #include <iostream>
 #include <vector>
@@ -113,13 +114,28 @@ void gen_abh(vector<vec3> &coords, vector<vec2> &ab,      //
   for (int i = 0; i < coords.size(); i++) {
     vec3 &pos = coords[i];
     vec2 &rect = ab[i];
+
     float r = sqrt(pow(pos.x, 2) + pow(pos.y - yc, 2));
     float phi = pi / 2 - atan((pos.y - yc) / pos.x);
+
+    // heuristically, make them ordered
+    if (pa0 > pa1)
+      std::swap(pa0, pa1);
+    if (pa1 > pa2)
+      std::swap(pa1, pa2);
+    if (pa0 > pa1)
+      std::swap(pa0, pa1);
+
+    // h
+
     phi = pos.x >= 0 ? phi : pi - phi;
     pos.z = gen_interp(r, r0, r1, r2, ph0, ph1, ph2) *
             gen_interp(phi, phi0, phi1, phi2, ph3, ph4, ph5);
     // de-normalize h
     pos.z = clip(2 + pos.z * (6 - 2), 2, 6);
+
+    // a, b
+
     float a = gen_interp(r, r0, r1, r2, pa0, pa1, pa2) *
               gen_interp(phi, phi0, phi1, phi2, pa3, pa4, pa5);
     float b = gen_interp(r, r0, r1, r2, pb0, pb1, pb2) *
@@ -399,6 +415,8 @@ static bool def_within(float x, float y) {
   return x * x + y * y < 350.f * 350.f;
 }
 
+extern float ParticleOptPenalty;
+
 float fitness_v2(const std::vector<float> &p) {
   const float r_min = 100;
   const float r_effect = 30;
@@ -411,13 +429,18 @@ float fitness_v2(const std::vector<float> &p) {
   // trim r_max to 300-700
   float r_max = clip(300 + p[0] * 400, 300, 700);
   // trim D to 2+5 - 8+5
-  float D = clip(9 + p[1] * 6, 7, 13);
+  float D = clip(7 + p[1] * 6, 7, 13);
   // trim yc to - (0 - 350)
-  float yc = -clip(p[2] * 200, 0, 200);
+  float yc = -clip(p[2] * 350, 0, 350);
 
   vector<float> tot, per;
 
-  cout << "v2 input: (r_max, d, yc)" << r_max << " " << D << " " << yc << endl;
+  printf("v2 input: R_max=%f, D=%f, yc=%f, penalty=%f, parms=", r_max, D, yc,
+         ParticleOptPenalty);
+  for (int i = 0; i < p.size(); i++) {
+    printf("%.2f, ", p[i]);
+  }
+  cout << ")" << endl;
 
   fitness_v1(r_min, r_max, D, yc, r_effect, def_within, p[3], p[4], p[5], p[6],
              p[7], p[8], p[9], p[10], p[11], p[12], p[13], p[14], p[15], p[16],
@@ -432,5 +455,5 @@ float fitness_v2(const std::vector<float> &p) {
 
   cout << "v2: tot,per: " << ftot << " " << fper << endl;
 
-  return -fper + std::max(f_thre - ftot, 0.f);
+  return -fper + std::max(f_thre - ftot, 0.f) * ParticleOptPenalty;
 }

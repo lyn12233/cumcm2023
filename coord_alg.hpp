@@ -67,4 +67,9 @@ void fitness_v1(                                     //
     std::vector<float> &tot, std::vector<float> &per //
 );
 
+///@param parm swarm position parameters, ordered in r_max in (300,700), D in
+///(7,13), yc in (0,-350) (as input they are normalized to 0,1), pa0..pa5,
+///pb0..pb5, ph0..ph5
+///@return fitness value, opt toward minimum, considers the penalty of total
+/// energy flow > 60kW, via exterior point method
 float fitness_v2(const std::vector<float> &parm);
