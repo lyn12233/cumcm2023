@@ -127,18 +127,29 @@ void gen_abh(vector<vec3> &coords, vector<vec2> &ab,      //
     // demornalize a,b
     rect.x = clip((D - 5) * a, 2, 8);
     rect.y = clip(rect.x * b, 2, 8);
+    rect.y = std::min(rect.y, 2 * pos.z);
   }
 }
 
 void get_sun_info(float D, float ST, float latitude, //
                   float &phi, float &theta           //
 ) {
-  float delta = asin(sin(2 * pi * D / 365) * sin(2 * pi * 23.45 / 365));
+  float delta = asin(sin(2 * pi * D / 365) * sin(23.45 * pi / 180));
   float omega = pi / 12 * (ST - 12);
-  phi = asin(cos(delta) * cos(latitude) * cos(omega) -
+  phi = asin(cos(delta) * cos(latitude) * cos(omega) +
              sin(delta) * sin(latitude));
-  theta = acos((sin(delta) - sin(phi) * sin(latitude)) /
-               (cos(phi) * cos(latitude)));
+  float cos_theta =
+      (sin(delta) - sin(phi) * sin(latitude)) / (cos(phi) * cos(latitude));
+  if (cos_theta <= -1 && cos_theta > -1 - 1e-3) {
+    theta = -pi;
+  } else if (cos_theta >= 1 && cos_theta < 1 + 1e-3) {
+    theta = pi;
+  } else if (cos_theta > -1 && cos_theta < 1) {
+    theta = acos(cos_theta);
+  } else {
+    cout << "\033[38;5;9mfatal: cos_theta invalid:" << cos_theta << "\033[0m\n";
+    exit(-1);
+  }
 }
 
 float get_dni(float phi, float height) {
@@ -352,6 +363,9 @@ void fittness_v1(                                    //
       float phi, theta;
       get_sun_info(days[i_day], hours[i_hour], lat, phi, theta);
       float dni = get_dni(phi, height);
+
+      // cout << "phi,theta,dni: " << phi << ", " << theta << ", " << dni <<
+      // endl;
 
       vector<vec3> coords;
       gen_coord(r_min, r_max, D, yc, within, coords);
