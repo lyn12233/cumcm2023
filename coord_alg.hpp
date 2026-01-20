@@ -52,7 +52,7 @@ void calcflow(const std::vector<vec2> &ab,     //
               float &tot, float &per           //
 );
 
-void fittness_v1(                                    //
+void fitness_v1(                                     //
     float r_min, float r_max,                        //
     float D,                                         //
     float yc,                                        //
@@ -66,3 +66,5 @@ void fittness_v1(                                    //
     float ph3, float ph4, float ph5,                 //
     std::vector<float> &tot, std::vector<float> &per //
 );
+
+float fitness_v2(const std::vector<float> &parm);

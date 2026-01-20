@@ -329,7 +329,7 @@ void calcflow(const std::vector<vec2> &ab,     //
   per = tot / areas;
 }
 
-void fittness_v1(                                    //
+void fitness_v1(                                     //
     float r_min, float r_max,                        //
     float D,                                         //
     float yc,                                        //
@@ -393,4 +393,44 @@ void fittness_v1(                                    //
                per[i_day * 5 + i_hour]);
     }
   }
+}
+
+static bool def_within(float x, float y) {
+  return x * x + y * y < 350.f * 350.f;
+}
+
+float fitness_v2(const std::vector<float> &p) {
+  const float r_min = 100;
+  const float r_effect = 30;
+  const float f_thre = 60000;
+
+  if (p.size() < 21) {
+    cout << "\033[38;5;9mtoo less parm\0330m\n";
+    exit(-1);
+  }
+  // trim r_max to 300-700
+  float r_max = clip(300 + p[0] * 400, 300, 700);
+  // trim D to 2+5 - 8+5
+  float D = clip(9 + p[1] * 6, 7, 13);
+  // trim yc to - (0 - 350)
+  float yc = -clip(p[2] * 200, 0, 200);
+
+  vector<float> tot, per;
+
+  cout << "v2 input: (r_max, d, yc)" << r_max << " " << D << " " << yc << endl;
+
+  fitness_v1(r_min, r_max, D, yc, r_effect, def_within, p[3], p[4], p[5], p[6],
+             p[7], p[8], p[9], p[10], p[11], p[12], p[13], p[14], p[15], p[16],
+             p[17], p[18], p[19], p[20], tot, per);
+
+  float ftot = 0, ftot_real = 0;
+  for (int i = 0; i < tot.size(); i++) {
+    ftot += tot[i], ftot_real += tot[i] / per[i];
+  }
+  float fper = ftot / ftot_real;
+  ftot /= tot.size();
+
+  cout << "v2: tot,per: " << ftot << " " << fper << endl;
+
+  return -fper + std::max(f_thre - ftot, 0.f);
 }

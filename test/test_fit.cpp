@@ -20,8 +20,8 @@ int main() {
 
   clock_t t0 = clock();
 
-  fittness_v1(r_min, r_max, d, yc, r_effect, within, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-              1, 1, 1, 1, 1, 1, 1, 1, 1, tot, per);
+  fitness_v1(r_min, r_max, d, yc, r_effect, within, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+             1, 1, 1, 1, 1, 1, 1, 1, 1, tot, per);
 
   clock_t t1 = clock();
   cout << "fitness uses time(ms): " << t1 - t0 << endl;
@@ -32,4 +32,11 @@ int main() {
     avg_tot += tot[i] / tot.size();
   }
   cout << "average " << avg_tot << endl;
+
+  // test v2
+  auto p = vector<float>(21, 1.f);
+  p[1] = 0; // D=13
+  p[2] = 1; // yc=0
+  float res2 = fitness_v2(p);
+  cout << "result2: " << res2 << endl;
 }
