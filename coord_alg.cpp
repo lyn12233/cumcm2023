@@ -345,19 +345,20 @@ void calcflow(const std::vector<vec2> &ab,     //
   per = tot / areas;
 }
 
-void fitness_v1(                                     //
-    float r_min, float r_max,                        //
-    float D,                                         //
-    float yc,                                        //
-    float R_effect,                                  // this not to opt
-    std::function<bool(float, float)> within,        //
-    float pa0, float pa1, float pa2,                 //
-    float pa3, float pa4, float pa5,                 //
-    float pb0, float pb1, float pb2,                 //
-    float pb3, float pb4, float pb5,                 //
-    float ph0, float ph1, float ph2,                 //
-    float ph3, float ph4, float ph5,                 //
-    std::vector<float> &tot, std::vector<float> &per //
+void fitness_v1(                                      //
+    float r_min, float r_max,                         //
+    float D,                                          //
+    float yc,                                         //
+    float R_effect,                                   // this not to opt
+    std::function<bool(float, float)> within,         //
+    float pa0, float pa1, float pa2,                  //
+    float pa3, float pa4, float pa5,                  //
+    float pb0, float pb1, float pb2,                  //
+    float pb3, float pb4, float pb5,                  //
+    float ph0, float ph1, float ph2,                  //
+    float ph3, float ph4, float ph5,                  //
+    std::vector<float> &tot, std::vector<float> &per, //
+    const std::string &save_fn                        //
 ) {
   const float days[12] = {0,   30,  60,  90,  120, 150,
                           180, 210, 240, 270, 300, 330};
@@ -369,9 +370,20 @@ void fitness_v1(                                     //
 
   vector<int> nears;
   vector<float> eta_c, eta_a, eta_t, eta_s;
+  vector<float> avg_c, avg_a, avg_t, avg_s;
 
   tot.resize(60);
   per.resize(60);
+
+  vector<vec3> coords;
+  gen_coord(r_min, r_max, D, yc, within, coords);
+  if (!save_fn.empty()) {
+    avg_c.resize(coords.size(), 0.f), avg_a.resize(coords.size(), 0.f);
+    avg_t.resize(coords.size(), 0.f), avg_s.resize(coords.size(), 0.f);
+  }
+  vector<vec2> rects;
+  gen_abh(coords, rects, yc, r_min, r_max, D, pa0, pa1, pa2, pa3, pa4, pa5, pb0,
+          pb1, pb2, pb3, pb4, pb5, ph0, ph1, ph2, ph3, ph4, ph5);
 
   for (int i_day = 0; i_day < 12; i_day++) {
     for (int i_hour = 0; i_hour < 5; i_hour++) {
@@ -382,13 +394,6 @@ void fitness_v1(                                     //
 
       // cout << "phi,theta,dni: " << phi << ", " << theta << ", " << dni <<
       // endl;
-
-      vector<vec3> coords;
-      gen_coord(r_min, r_max, D, yc, within, coords);
-
-      vector<vec2> rects;
-      gen_abh(coords, rects, yc, r_min, r_max, D, pa0, pa1, pa2, pa3, pa4, pa5,
-              pb0, pb1, pb2, pb3, pb4, pb5, ph0, ph1, ph2, ph3, ph4, ph5);
 
       nears.resize(coords.size());
       for (int i = 0; i < coords.size(); i++)
@@ -405,9 +410,28 @@ void fitness_v1(                                     //
                  eta_a[i_coord], eta_t[i_coord], eta_s[i_coord]);
       }
 
+      if (!save_fn.empty()) {
+        for (int i = 0; i < coords.size(); i++) {
+          avg_c[i] += eta_c[i] / 60, avg_a[i] += eta_a[i] / 60;
+          avg_t[i] += eta_t[i] / 60, avg_s[i] += eta_s[i] / 60;
+        }
+      }
+
       calcflow(rects, eta_c, eta_a, eta_t, eta_s, dni, tot[i_day * 5 + i_hour],
                per[i_day * 5 + i_hour]);
+    } // for hours
+  } // for days
+
+  if (!save_fn.empty()) {
+    FILE *fp;
+    fopen_s(&fp, save_fn.c_str(), "wb");
+    for (int i = 0; i < coords.size(); i++) {
+      fprintf(fp, "%f, %f, %f, %f, %f, %f, %f, %f, %f\n", coords[i].x,
+              coords[i].y, coords[i].z, rects[i].x, rects[i].y, avg_c[i],
+              avg_a[i], avg_t[i], avg_s[i]);
     }
+    fflush(fp);
+    fclose(fp);
   }
 }
 
@@ -456,4 +480,18 @@ float fitness_v2(const std::vector<float> &p) {
   cout << "v2: tot,per: " << ftot << " " << fper << endl;
 
   return -fper + std::max(f_thre - ftot, 0.f) * ParticleOptPenalty;
+}
+
+void dump_args(const std::vector<float> &p, const std::string &fn) {
+  const float r_min = 100;
+  const float r_effect = 30;
+  const float f_thre = 60000;
+
+  float r_max = clip(300 + p[0] * 400, 300, 700);
+  float D = clip(7 + p[1] * 6, 7, 13);
+  float yc = -clip(p[2] * 350, 0, 350);
+  vector<float> tot, per;
+  fitness_v1(r_min, r_max, D, yc, r_effect, def_within, p[3], p[4], p[5], p[6],
+             p[7], p[8], p[9], p[10], p[11], p[12], p[13], p[14], p[15], p[16],
+             p[17], p[18], p[19], p[20], tot, per, fn);
 }

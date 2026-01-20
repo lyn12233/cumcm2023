@@ -37,13 +37,13 @@ int main() {
   // option(3): restrict range of d,yc,ph
 
   min_s = {
-      0.3,  0.4,  0.65,                 // r_max, d, yc
+      0.99, 0.4,  0.65,                 // r_max, d, yc
       0.8,  0.8,  0.8,  0.8, 0.8,  0.8, // pa
       0.8,  0.8,  0.8,  0.8, 0.8,  0.8, // pb
       0.60, 0.55, 0.2,  0.5, 0.15, 0.3  // ph
   };
   max_s = {
-      0.6, 0.5,  0.75,                //
+      1.0, 0.5,  0.75,                //
       1,   1,    1,    1,   1,    1,  //
       1,   1,    1,    1,   1,    1,  //
       0.7, 0.65, 0.3,  0.7, 0.35, 0.4 //
@@ -53,18 +53,18 @@ int main() {
   // option(2)
   nb_swarm = 20, nb_iter = 20;
   // option(3)
-  nb_swarm = 30, nb_iter = 30;
+  nb_swarm = 20, nb_iter = 40;
 
   auto opt = ParticleOpt(fitness_v2, // func
                          nb_swarm,   // swarm size
                          21,         // dim
                          nb_iter,    // iter
-                         1, 1,       // c1c2
+                         0.5, 4,     // c1c2
                          0.9, 0.99,  // w1w2
                          0.2,        // v_max
                          min_s, max_s);
 
   cout << "main: start optimize" << endl;
 
-  opt.optimize(1e-3, 1.3);
+  opt.optimize(1, 1);
 }

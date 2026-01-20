@@ -3,6 +3,7 @@
 #include "vec_types.hpp"
 
 #include <functional>
+#include <string>
 #include <vector>
 
 void gen_coord(float R_min, float R_max, float D,        //
@@ -52,24 +53,27 @@ void calcflow(const std::vector<vec2> &ab,     //
               float &tot, float &per           //
 );
 
-void fitness_v1(                                     //
-    float r_min, float r_max,                        //
-    float D,                                         //
-    float yc,                                        //
-    float R_effect,                                  // this not to opt
-    std::function<bool(float, float)> within,        //
-    float pa0, float pa1, float pa2,                 //
-    float pa3, float pa4, float pa5,                 //
-    float pb0, float pb1, float pb2,                 //
-    float pb3, float pb4, float pb5,                 //
-    float ph0, float ph1, float ph2,                 //
-    float ph3, float ph4, float ph5,                 //
-    std::vector<float> &tot, std::vector<float> &per //
+void fitness_v1(                                      //
+    float r_min, float r_max,                         //
+    float D,                                          //
+    float yc,                                         //
+    float R_effect,                                   // this not to opt
+    std::function<bool(float, float)> within,         //
+    float pa0, float pa1, float pa2,                  //
+    float pa3, float pa4, float pa5,                  //
+    float pb0, float pb1, float pb2,                  //
+    float pb3, float pb4, float pb5,                  //
+    float ph0, float ph1, float ph2,                  //
+    float ph3, float ph4, float ph5,                  //
+    std::vector<float> &tot, std::vector<float> &per, //
+    const std::string &save_fn = ""                   //
 );
 
 ///@param parm swarm position parameters, ordered in r_max in (300,700), D in
 ///(7,13), yc in (0,-350) (as input they are normalized to 0,1), pa0..pa5,
-///pb0..pb5, ph0..ph5
+/// pb0..pb5, ph0..ph5
 ///@return fitness value, opt toward minimum, considers the penalty of total
 /// energy flow > 60kW, via exterior point method
 float fitness_v2(const std::vector<float> &parm);
+
+void dump_args(const std::vector<float> &p, const std::string &fn = "tmp.csv");
