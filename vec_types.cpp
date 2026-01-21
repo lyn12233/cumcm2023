@@ -2,6 +2,8 @@
 
 #include <cmath>
 
+vec3::vec3(float x, float y, float z) : x(x), y(y), z(z) {}
+
 vec3 vec3::cross(const vec3 &v) const {
   return {y * v.z - z * v.y, z * v.x - x * v.z, x * v.y - y * v.x};
 }

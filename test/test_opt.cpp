@@ -40,26 +40,23 @@ int main() {
       0.99, 0.4,  0.65,                 // r_max, d, yc
       0.8,  0.8,  0.8,  0.8, 0.8,  0.8, // pa
       0.8,  0.8,  0.8,  0.8, 0.8,  0.8, // pb
-      0.60, 0.55, 0.2,  0.5, 0.15, 0.3  // ph
+      0.0, 0.0, 0.0,  0.0, 0.0, 0.0  // ph
   };
   max_s = {
       1.0, 0.5,  0.75,                //
       1,   1,    1,    1,   1,    1,  //
       1,   1,    1,    1,   1,    1,  //
-      0.7, 0.65, 0.3,  0.7, 0.35, 0.4 //
+      1, 1, 1,  1, 1, 1 //
   };
 
   int nb_swarm, nb_iter;
-  // option(2)
-  nb_swarm = 20, nb_iter = 20;
-  // option(3)
-  nb_swarm = 20, nb_iter = 40;
+  nb_swarm = 40, nb_iter = 40;
 
   auto opt = ParticleOpt(fitness_v2, // func
                          nb_swarm,   // swarm size
                          21,         // dim
                          nb_iter,    // iter
-                         0.5, 4,     // c1c2
+                         2, 2,     // c1c2
                          0.9, 0.99,  // w1w2
                          0.2,        // v_max
                          min_s, max_s);

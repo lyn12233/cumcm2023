@@ -1,7 +1,5 @@
 #include "coord_alg.hpp"
 
-#include "vec_types.hpp"
-
 #include <algorithm>
 #include <cmath>
 #include <cstdio>
@@ -241,11 +239,17 @@ void calcetas(const vector<vec3> &coords,                            //
 ) {
   // collect coordinate info
   vec3 pos = coords[at];
-  vec3 d = (vec3){0, y_c, h_c1 + h_c2 / 2} - pos;
-  vec3 L = -(vec3){sin(theta) * cos(phi), cos(theta) * cos(phi), sin(phi)};
+  vec3 d = vec3(0, y_c, h_c1 + h_c2 / 2) - pos;
+  vec3 L = -vec3(sin(theta) * cos(phi), cos(theta) * cos(phi), sin(phi));
   vec3 N = vec3::norm(d.norm() - L);
   vec3 n2 = vec3::norm({d.x, d.y, 0});
   vec3 n3 = N.cross(n2);
+
+  // make randoms
+  float rands[16];
+  for (int i = 0; i < 16; i++) {
+    rands[i] = (float)(rand() & 0xff) / 255.;
+  }
 
   // (1) eta_c
   eta_c = std::max(-N.dot(L), 0.f);
@@ -271,8 +275,10 @@ void calcetas(const vector<vec3> &coords,                            //
       float yo = (0.25 * m - 0.375) * b * eta_c;
       int cnt = 0;
       for (int i_samp = 0; i_samp < 7; i_samp++) {
-        float xs = xo + R_diff * x_samples[i_samp];
-        float ys = xo + R_diff * y_samples[i_samp];
+        float xs =
+            xo + R_diff * (x_samples[i_samp] - 0.125 + rands[n + i_samp] / 4);
+        float ys =
+            xo + R_diff * (y_samples[i_samp] - 0.125 + rands[m + i_samp] / 4);
         if (abs(xs) <= rc && abs(ys) <= h_2)
           cnt++;
       }
@@ -303,8 +309,8 @@ void calcetas(const vector<vec3> &coords,                            //
     float delta_b = relpos2.x * sqrt(1 - eta_c * eta_c);
     for (int n = 0; n < 4; n++) {
       for (int m = 0; m < 4; m++) {
-        float xo = (0.25 * n - 0.375) * a;
-        float yo = (0.25 * m - 0.375) * b * eta_c;
+        float xo = (0.25 * n - 0.5 + rands[n * 4 + m] / 4) * a;
+        float yo = (0.25 * m - 0.5 + rands[m * 4 + n] / 4) * b * eta_c;
         if ((abs(xo - relpos2.y - delta_b) < a2 / 2 ||
              abs(xo - relpos2.y + delta_b) < a2 / 2) &&
             abs(yo - relpos2.z) < b2 / 2) {
@@ -485,7 +491,6 @@ float fitness_v2(const std::vector<float> &p) {
 void dump_args(const std::vector<float> &p, const std::string &fn) {
   const float r_min = 100;
   const float r_effect = 30;
-  const float f_thre = 60000;
 
   float r_max = clip(300 + p[0] * 400, 300, 700);
   float D = clip(7 + p[1] * 6, 7, 13);
