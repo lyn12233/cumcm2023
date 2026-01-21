@@ -166,6 +166,8 @@ void get_sun_info(float D, float ST, float latitude, //
     theta = pi;
   } else if (cos_theta > -1 && cos_theta < 1) {
     theta = acos(cos_theta);
+    if (ST > 12)
+      theta = -theta;
   } else {
     cout << "\033[38;5;9mfatal: cos_theta invalid:" << cos_theta << "\033[0m\n";
     exit(-1);
@@ -505,4 +507,12 @@ void dump_args(const std::vector<float> &p, const std::string &fn) {
   fitness_v1(r_min, r_max, D, yc, r_effect, def_within, p[3], p[4], p[5], p[6],
              p[7], p[8], p[9], p[10], p[11], p[12], p[13], p[14], p[15], p[16],
              p[17], p[18], p[19], p[20], tot, per, fn);
+
+  float ftot = 0, ftot_real = 0;
+  for (int i = 0; i < tot.size(); i++) {
+    ftot += tot[i], ftot_real += tot[i] / per[i];
+  }
+  float fper = ftot / ftot_real;
+  ftot /= tot.size();
+  printf("total flow: %f, flow per area: %f\n", ftot, fper);
 }
