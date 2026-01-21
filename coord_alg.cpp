@@ -89,9 +89,15 @@ static float gen_interp(float x,                      //
                         float x0, float x1, float x2, //
                         float y0, float y1, float y2  //
 ) {
-  return y0 * (x - x1) * (x - x2) / (x0 - x1) / (x0 - x2) +
-         y1 * (x - x0) * (x - x2) / (x1 - x0) / (x1 - x2) +
-         y2 * (x - x0) * (x - x1) / (x2 - x0) / (x2 - x1);
+  // return y0 * (x - x1) * (x - x2) / (x0 - x1) / (x0 - x2) +
+  //        y1 * (x - x0) * (x - x2) / (x1 - x0) / (x1 - x2) +
+  //        y2 * (x - x0) * (x - x1) / (x2 - x0) / (x2 - x1);
+  // now only uses 2 point to interp
+  if (x == x0)
+    return y0;
+  if (x == x2)
+    return y2;
+  return y0 * (x - x2) / (x0 - x2) + y2 * (x - x0) / (x2 - x0);
 }
 static float clip(float x, float min_, float max_) {
   return std::min(std::max(x, min_), max_);
