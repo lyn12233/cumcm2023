@@ -277,8 +277,8 @@ void calcetas(const vector<vec3> &coords,                            //
   float eta_truncs[4][4];
   for (int n = 0; n < 4; n++) {
     for (int m = 0; m < 4; m++) {
-      float xo = (0.25 * n - 0.375) * a;
-      float yo = (0.25 * m - 0.375) * b * eta_c;
+      float xo = (0.25 * n - 0.5 + rands[n * 4 + m] / 4) * a;
+      float yo = (0.25 * m - 0.5 + rands[m * 4 + n] / 4) * b * eta_c;
       int cnt = 0;
       for (int i_samp = 0; i_samp < 7; i_samp++) {
         float xs =
